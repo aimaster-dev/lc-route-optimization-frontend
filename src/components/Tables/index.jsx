@@ -90,7 +90,7 @@ const RouteSegmentsTable = ({ route_id }) => {
           </table>
           {/* Actual PERM Notes Table */}
           <div className="notes-table">
-            <h5>Actual Segment PERM Notes</h5>
+            <h5>Actual Segment Service Time</h5>
             <table className="results-table">
               <thead>
                 <tr>
@@ -102,7 +102,7 @@ const RouteSegmentsTable = ({ route_id }) => {
                 {manualSegments.map((row, index) => (
                   <tr key={index}>
                     <td>{row.Segment}</td>
-                    <td>{Math.round(row["Service_time"] * 100) / 100 || "N/A"}</td>
+                    <td>{Math.round(row["Service Time"] * 100) / 100 || "N/A"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -150,7 +150,7 @@ const RouteSegmentsTable = ({ route_id }) => {
                 {optimalSegments.map((row, index) => (
                   <tr key={index}>
                     <td>{row.Segment}</td>
-                    <td>{Math.round(row["Service_time"] * 100) / 100 || "N/A"}</td>
+                    <td>{Math.round(row["Service Time"] * 100) / 100 || "N/A"}</td>
                   </tr>
                 ))}
               </tbody>
