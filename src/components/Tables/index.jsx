@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { getComparisonData } from '../../services/routeService';
-import './style.css'; 
+import './style.css';
 
 const RouteSegmentsTable = ({ route_id }) => {
   const [tableData, setTableData] = useState([]);
+  const [manualStandardData, setManualStandardData] = useState([]);
+  const [optimalStandardData, setOptimalStandardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,6 +17,8 @@ const RouteSegmentsTable = ({ route_id }) => {
           console.log("Fetched table data:", data);
           if (data.success) {
             setTableData(data.route.sequence || []);
+            setManualStandardData(data.route.aggregate[0]['Table Manual Data'] || []);
+            setOptimalStandardData(data.route.aggregate[0]['Table Optimal Data'] || []);
           } else {
             setError(data.error);
           }
@@ -57,6 +61,28 @@ const RouteSegmentsTable = ({ route_id }) => {
   const totalOptimalTime = calculateTotalTime(optimalSegments) / 60;
   const totalOptimalDistance = optimalSegments.reduce((acc, row) => acc + Number(row["Distance (km)"] || 0), 0);
 
+  const mSData = manualStandardData[0].map((name, index) => {
+    const isLastIndex = index === manualStandardData[0].length - 1;
+    const distance = isLastIndex ? manualSegments.length - manualStandardData[2][index] + 1 : manualStandardData[2][index + 1] - manualStandardData[2][index];
+    return {
+      name: name,
+      distance: distance,
+      index: manualStandardData[2][index],
+      type: manualStandardData[1][index]
+    }
+  });
+
+  const oSData = optimalStandardData[0].map((name, index) => {
+    const isLastIndex = index === optimalStandardData[0].length - 1;
+    const distance = isLastIndex ? optimalSegments.length - optimalStandardData[2][index] + 1 : optimalStandardData[2][index + 1] - optimalStandardData[2][index];
+    return {
+      name: name,
+      distance: distance,
+      index: optimalStandardData[2][index],
+      type: optimalStandardData[1][index]
+    }
+  });
+
   return (
     <div className="table-container">
       <h3>Route Segments</h3>
@@ -67,24 +93,32 @@ const RouteSegmentsTable = ({ route_id }) => {
           <table className="results-table">
             <thead>
               <tr>
+                <th>Service Window</th>
                 <th>Segment</th>
                 <th>Time (min)</th>
                 <th>Distance (Mile)</th>
               </tr>
             </thead>
             <tbody>
-              {manualSegments.map((row, index) => (
-                <tr key={index}>
-                  <td>{row.Segment}</td>
-                  <td>{row["Time (min)"]}</td>
-                  <td>{row["Distance (km)"]}</td>
-                </tr>
-              ))}
+              {manualSegments.map((row, index) => {
+                const stop = mSData.find(stop => stop.index === index + 1);
+                return (
+                  <tr key={index}>
+                    {
+                      stop ? <td rowSpan={stop.distance}>{stop.name}-{stop.type}</td> : null
+                    }
+                    <td>{row.Segment}</td>
+                    <td>{row["Time (min)"]}</td>
+                    <td>{row["Distance (km)"]}</td>
+                  </tr>
+                );
+              })}
+
               <tr className="totals-row">
+                <td></td>
                 <td><strong>Total</strong></td>
                 <td><strong>{totalManualTime.toFixed(2)} hours</strong></td>
                 <td><strong>{totalManualDistance.toFixed(1)}</strong></td>
-                <td></td>
               </tr>
             </tbody>
           </table>
@@ -94,17 +128,24 @@ const RouteSegmentsTable = ({ route_id }) => {
             <table className="results-table">
               <thead>
                 <tr>
+                  <th>Service Window</th>
                   <th>Segment</th>
                   <th>Service Time</th>
                 </tr>
               </thead>
               <tbody>
-                {manualSegments.map((row, index) => (
-                  <tr key={index}>
-                    <td>{row.Segment}</td>
-                    <td>{Math.round(row["Service Time"] * 100) / 100 || "N/A"}</td>
-                  </tr>
-                ))}
+                {manualSegments.map((row, index) => {
+                  const stop = mSData.find(stop => stop.index === index + 1);
+                  return (
+                    <tr key={index}>
+                      {
+                        stop ? <td rowSpan={stop.distance}>{stop.name}-{stop.type}</td> : null
+                      }
+                      <td>{row.Segment}</td>
+                      <td>{row["PERM_NOTES"] || "N/A"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -115,24 +156,32 @@ const RouteSegmentsTable = ({ route_id }) => {
           <table className="results-table">
             <thead>
               <tr>
+                <th>Seervice Window</th>
                 <th>Segment</th>
                 <th>Time (min)</th>
                 <th>Distance (Mile)</th>
               </tr>
             </thead>
             <tbody>
-              {optimalSegments.map((row, index) => (
-                <tr key={index}>
-                  <td>{row.Segment}</td>
-                  <td>{row["Time (min)"]}</td>
-                  <td>{row["Distance (km)"]}</td>
-                </tr>
-              ))}
+              {optimalSegments.map((row, index) => {
+                const stop = oSData.find(stop => stop.index === index + 1); // +1 because sData uses 1-based index
+                return (
+                  <tr key={index}>
+                    {
+                      stop ? <td rowSpan={stop.distance}>{stop.name}-{stop.type}</td> : null
+                    }
+                    <td>{row.Segment}</td>
+                    <td>{row["Time (min)"]}</td>
+                    <td>{row["Distance (km)"]}</td>
+                  </tr>
+                );
+              })}
+
               <tr className="totals-row">
+                <td></td>
                 <td><strong>Total</strong></td>
                 <td><strong>{totalOptimalTime.toFixed(2)} hours</strong></td>
                 <td><strong>{totalOptimalDistance.toFixed(1)}</strong></td>
-                <td></td>
               </tr>
             </tbody>
           </table>
@@ -142,17 +191,24 @@ const RouteSegmentsTable = ({ route_id }) => {
             <table className="results-table">
               <thead>
                 <tr>
+                  <th>Service Window</th>
                   <th>Segment</th>
                   <th>Service Time</th>
                 </tr>
               </thead>
               <tbody>
-                {optimalSegments.map((row, index) => (
-                  <tr key={index}>
-                    <td>{row.Segment}</td>
-                    <td>{Math.round(row["Service Time"] * 100) / 100 || "N/A"}</td>
-                  </tr>
-                ))}
+                {optimalSegments.map((row, index) => {
+                  const stop = oSData.find(stop => stop.index === index + 1); // +1 because sData uses 1-based index
+                  return (
+                    <tr key={index}>
+                      {
+                        stop ? <td rowSpan={stop.distance}>{stop.name}-{stop.type}</td> : null
+                      }
+                      <td>{row.Segment}</td>
+                      <td>{row["PERM_NOTES"] || "N/A"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
