@@ -86,3 +86,7 @@ ul li span {
 .sidebar-button:focus {
   outline: none;
 }
+
+.color-red {
+  color: red;
+}

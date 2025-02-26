@@ -84,4 +84,24 @@ export const fetchRouteData = async (routeId) => {
       return { success: false, error: error.message };
     }
   };
+
+  export const downloadFull = async () => {
+    try {
+      const response = await apiClient.get(`/download-full`, { responseType: 'blob' });
+  
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+  
+      return { success: true };
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+      return { success: false, error: error.message };
+    }
+  };
   
