@@ -58,6 +58,27 @@
   outline: none;
 }
 
+/* Comparison button */
+.download-button {
+  padding: 10px 0px;
+  font-size: 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.download-button:hover {
+  background-color: #45a049;
+}
+
+.download-button:focus {
+  outline: none;
+}
+
 /* Styling for CompareRoutes component */
 .compare-routes {
   background-color: #f9f9f9;
@@ -70,4 +91,8 @@
 /* Hide comparison content initially */
 .compare-routes.hidden {
   display: none;
+}
+
+.mb-0 {
+  margin-bottom: 0px !important;
 }

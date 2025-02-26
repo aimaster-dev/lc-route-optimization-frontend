@@ -4,7 +4,7 @@ import React from 'react';
 import RouteDetails from '../RouteDetails';
 import './style.css';
 
-const Sidebar = ({ routes, selectedRoute, onRouteSelect, setOptimizeRoute, showOptimizeRoute, setShowComparison,showComparison }) => {
+const Sidebar = ({ routes, selectedRoute, onRouteSelect, setOptimizeRoute, showOptimizeRoute, setShowComparison, showComparison }) => {
   const handleRouteChange = async (event) => {
     const route_number = event.target.value;
     setOptimizeRoute(false)
@@ -15,7 +15,7 @@ const Sidebar = ({ routes, selectedRoute, onRouteSelect, setOptimizeRoute, showO
   return (
     <div className="sidebar">
       <h2>Select Route</h2>
-      <select value={selectedRoute} onChange={handleRouteChange}>
+      <select value={selectedRoute} onChange={handleRouteChange} className='mb-0'>
         <option value="">Select Route</option>
         {routes?.map((route, index) => (
           <option key={index} value={route.route_number}>
@@ -23,6 +23,7 @@ const Sidebar = ({ routes, selectedRoute, onRouteSelect, setOptimizeRoute, showO
           </option>
         ))}
       </select>
+      <button class="download-button">Download CSV</button>
       {selectedRoute && <RouteDetails routeId={selectedRoute} setOptimizeRoute={setOptimizeRoute} showOptimizeRoute={showOptimizeRoute} setShowComparison={setShowComparison} showComparison={showComparison} />}
     </div>
   );
